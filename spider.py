@@ -1,13 +1,18 @@
 '''
-获取网页信息
+遗留问题：
+1.如何使用IP代理（如何获取代理IP）
+2.如何加入浏览器模拟
 '''
 #!/usr/bin/python
 #coding:utf-8
-import urllib
-from urllib import request
-from bs4 import BeautifulSoup
-import re
+# import urllib
+# from urllib import request
+# from bs4 import BeautifulSoup
+# import re
+from HtmlTools import HtmlTools
+from AccessTools import AccessTools
 import os
+import re
 import threading
 import random
 import time
@@ -58,18 +63,39 @@ res_td = r'<td>(.*?)</td>'
 
 #爬取入口
 def main(url, i):
-    m_tr = getHtmlInfo(url)
-    PrizeInformation = getPrizeInformation(m_tr)
-    AllInformation[i] = PrizeInformation
+    htmlTools = HtmlTools()
+    accessTools = AccessTools()
+    html = htmlTools.getHtmlInfo(url)
+    Data = ResolveToData(html)
+    for data in Data:
+        ProcessData(data)
+    accessTools.WriteToText(Data)
+    # PrizeInformation = getPrizeInformation(m_tr)
+    # AllInformation[i] = PrizeInformation
     #print(AllInformation)
 
-#获取页面信息
-def getHtmlInfo(_url):
-    req = urllib.request.Request(url = _url)
-    html = request.urlopen(req).read()
-    html = html.decode('utf-8')
+#解析界面，提取数据
+def ResolveToData(html):
+    Data = []
     m_tr = re.findall(res_tr,html,re.S|re.M)
-    return m_tr
+    for line in m_tr:
+        m_td = re.findall(res_td,line[1],re.S|re.M)
+        Data.append(m_td)
+    return Data
+
+#处理数据，添加属性
+def ProcessData(Data):
+    Property = {}
+    prizeNumber = ''.join(Data[1])
+    NumberList = prizeNumber.split(',')
+    count = 1
+    for n in NumberList:
+        if count <= 5:
+            Property[n] = -1
+        else:
+            Property[n] = 1
+        count += 1
+    Data.append(Property)
 
 #获取某一期信息
 def getPrizeInformation(m_tr):
@@ -85,8 +111,6 @@ def getPrizeInformation(m_tr):
                         cursorclass=pymysql.cursors.DictCursor)
         cursor = connection.cursor()
         sql = "INSERT INTO info__oper (期号, 中奖号码, 中奖时间) VALUES ('%s', '%s', '%s')"%(m_td[0], m_td[1], m_td[2])
-        #print(sql)
-        #sql = "select * from info_"
         cursor.execute(sql)
         cursor.close()
         connection.commit()
@@ -99,12 +123,12 @@ def getPrizeInformation(m_tr):
     return PrizeInformation
 
 if __name__ == "__main__":
-    #main("http://www.bwlc.net/bulletin/prevtrax.html",1)
-    threads = []
-    for i in range(1, 15000):
-        urls = "http://www.bwlc.net/bulletin/prevtrax.html?page=%d" %i
-        t = threading.Thread( target = main,args = (urls, i))
-        time.sleep(0.5)
-        t.setDaemon(True)
-        t.start()
-        threads.append(t)
+    main("http://www.bwlc.net/bulletin/prevtrax.html",1)
+    # threads = []
+    # for i in range(1, 15000):
+    #     urls = "http://www.bwlc.net/bulletin/prevtrax.html?page=%d" %i
+    #     t = threading.Thread( target = main,args = (urls, i))
+    #     time.sleep(0.5)
+    #     t.setDaemon(True)
+    #     t.start()
+    #     threads.append(t)
