@@ -27,6 +27,7 @@
             "program": "${file}",
             "console": "integratedTerminal"
         },
+<<<<<<< HEAD
         {
             "name": "Python: Terminal (external)",
             "type": "python",
@@ -34,6 +35,15 @@
             "program": "${file}",
             "console": "externalTerminal"
         },
+=======
+        // {
+        //     "name": "Python: Terminal (external)",
+        //     "type": "python",
+        //     "request": "launch",
+        //     "program": "${file}",
+        //     "console": "externalTerminal"
+        // },
+>>>>>>> 8e870e8c083f9fed1e9b9213c1692de255d0fc18
         {
             "name": "Python: Django",
             "type": "python",

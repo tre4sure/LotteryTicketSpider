@@ -17,6 +17,7 @@ import threading
 import random
 import time
 import pymysql.cursors
+import json
 
 '''数据注释
 AllInformation    所有的信息
@@ -64,12 +65,13 @@ history = {
 }
 
 realTime = {
-    'res_table': r'<table cellpadding="1" cellspacing="1" border="0">(.*?)</table>',
-    'res_tbody': r'<tbody>(.*?)</tbody>',
-    'res_tr': r'<tr>(.*?)</tr>',
-    'res_td': r'<td>(.*?)</td>',
-    #'res_ul': r'<ul class="(.*?)">(.*?)</ul>'
-    'res_i': r'<i>(.*?)</i>'
+    # 'res_table': r'<table cellpadding="1" cellspacing="1" border="0">(.*?)</table>',
+    # 'res_tbody': r'<tbody>(.*?)</tbody>',
+    # 'res_tr': r'<tr>(.*?)</tr>',
+    # 'res_td': r'<td>(.*?)</td>',
+    # #'res_ul': r'<ul class="(.*?)">(.*?)</ul>'
+    # 'res_i': r'<i>(.*?)</i>'
+    'api': "https://www.38011.com/1/pk10/pk10list.php?lotCode=10001"
 }
 
 
@@ -79,8 +81,10 @@ def main(url, i):
     htmlTools = HtmlTools()
     accessTools = AccessTools()
     html = htmlTools.getHtmlInfo(url)
-    print(html)
-    Data = ResolveToData_RealTime(html)
+    ticketJson = json.loads(html)
+    # for data in ticketJson['result']['data']:
+    #     print(data)
+    Data = ResolveToData_RealTime(ticketJson)
     # accessTools.initMySql("localhost", "root", "caochen520")
     # for data in Data:
     #     ProcessData(data)
@@ -103,22 +107,15 @@ def ResolveToData_History(html):
     return Data
 
 #解析界面，提取数据   https://www.38011.com/kjls/pk10/pk10kai_history.html 站点信息
-def ResolveToData_RealTime(html):
+def ResolveToData_RealTime(json):
     Data = []
-    m_table = re.findall(realTime['res_table'],html,re.S|re.M)
-    print(m_table)
-    m_tbody = re.findall(realTime['res_tbody'],m_table,re.S|re.M)
-    print(m_tbody)
-    m_tr = re.findall(realTime['res_tr'],m_tbody,re.S|re.M)
-    print(m_tr)
-    for _tr in m_tr:
-        m_td = re.findall(realTime['res_td'],_tr,re.S|re.M)
-        if m_td == None:
-            continue
-        i = re.findall(realTime['res_i'],m_td,re.S|re.M)
-        print(i)
-        # data = []
-        # data.append(m_td[0],m_td[1],m_td[2])
+    for j in json['result']['data']:
+        data = []
+        data.append(j['preDrawIssue'])
+        data.append(j['preDrawCode'])
+        data.append(j['preDrawTime'])
+        Data.append(data)
+    print(Data)
     return Data
 
 #处理数据，添加属性
@@ -129,7 +126,7 @@ def ProcessData(data):
     count = 1
     for n in NumberList:
         if count <= 5:
-            Property[n] = -1
+            Property[n] = 0
         else:
             Property[n] = 1
         count += 1
@@ -185,7 +182,7 @@ if __name__ == "__main__":
     historyPage = "http://www.bwlc.net/bulletin/trax.html"
     ChildPage = "http://www.bwlc.net/bulletin/prevtrax.html"
     realTimePage = "https://www.38011.com/kjls/pk10/pk10kai_history.html"
-    main(realTimePage,1)
+    main(realTime['api'],1)
     # threads = []
     # for i in range(1, 15000):
     #     urls = "http://www.bwlc.net/bulletin/prevtrax.html?page=%d" %i
