@@ -58,8 +58,6 @@ def fun_mtc():
                 中奖号码： %s,\
                 开奖时间： %s"\
                 %(ticketJson_mtc[0]['issue'],ticketJson_mtc[0]['openNum'],ticketJson_mtc[0]['openDateTime']))
-        global runFlag 
-        runFlag = False
         return
     global latestPrizeNum
     tmpPrizeNum = ticketJson_mtc[0]['openNum']
@@ -92,8 +90,8 @@ def fun_38011():
     if data_38011 == None:
         print('获取网络数据失败，将再次尝试...')
         return
-    ticketJson_mtc = json.loads(data_38011)
-    data = ticketJson_mtc['result']['data']
+    ticketJson_38011 = json.loads(data_38011)
+    data = ticketJson_38011['result']['data']
     openMinute = time.strptime(data[0]['preDrawTime'], "%Y-%m-%d %H:%M:%S").tm_min
     nowMinute = time.localtime().tm_min
     if nowMinute - openMinute >= 6 and nowMinute - openMinute > 0:
@@ -103,8 +101,6 @@ def fun_38011():
                 中奖号码： %s,\
                 开奖时间： %s"\
                 %(data[0]['preDrawIssue'],data[0]['preDrawCode'],data[0]['preDrawTime']))
-        global runFlag
-        runFlag = False
         return
     global latestPrizeNum
     tmpPrizeNum = data[0]['preDrawCode']
@@ -216,24 +212,10 @@ def get_ip_list(url):
         ip_list.append(tds[1].text + ':' + tds[2].text)
     return ip_list
 
-def get_all_ip_list(url):
-    htmlTools = HtmlTools()
-    web_data = htmlTools.getHtmlInfo(url, headers)
-    soup = BeautifulSoup(web_data, 'lxml')
-    ips = soup.find_all('tr')
-    ip_list = []
-    for i in range(1, len(ips)):
-        ip_info = ips[i]
-        tds = ip_info.find_all('td')
-        ip_list.append(tds[1].text + ':' + tds[2].text)
-    print(ip_list)
-    return ip_list
-
 if __name__ == "__main__":
     for ip in get_ip_list(ip_url):
         Proxy.append('http://'+ip)
-    runFlag = True
-    while runFlag:
+    while True:
         main()
         time.sleep(5)
         pass
