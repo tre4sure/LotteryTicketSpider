@@ -10,6 +10,11 @@ from bs4 import BeautifulSoup
 ip_url = 'http://www.xicidaili.com/nn/'
 ticket_common_url = "https://www.mtc328.com/data/bjpk10/lotteryList/%s.json"
 
+MoreThen12 = []
+MoreThen13 = []
+MoreThen14 = []
+MoreThen15 = []
+
 Proxy = []
 
 User_Agent = [  
@@ -101,18 +106,31 @@ def main(ticket_url):
                 if maxContinuousTimes[str(i)] < count:
                     maxContinuousTimes[str(i)] = count
                 count = 0
-    print("*********************%d 年%d 月%d 号 中奖信息*********************** \n"%(openDate.tm_year,openDate.tm_mon,openDate.tm_mday))
+
+    #print("*********************%d 年%d 月%d 日 中奖信息*********************** \n"%(openDate.tm_year,openDate.tm_mon,openDate.tm_mday))
     for i in range(1,11):
-        print('%d 号 的最高连续中奖次数为 %d \n'%(i, maxContinuousTimes[str(i)]))
+        #print('%d 号 的最高连续中奖次数为 %d \n'%(i, maxContinuousTimes[str(i)]))
+        if maxContinuousTimes[str(i)] >= 15:
+            MoreThen15.append('%d 年%d 月%d'%(openDate.tm_year,openDate.tm_mon,openDate.tm_mday))
+        elif maxContinuousTimes[str(i)] >= 14:
+            MoreThen14.append('%d 年%d 月%d'%(openDate.tm_year,openDate.tm_mon,openDate.tm_mday))
+        elif maxContinuousTimes[str(i)] >= 13:
+            MoreThen13.append('%d 年%d 月%d'%(openDate.tm_year,openDate.tm_mon,openDate.tm_mday))
+        elif maxContinuousTimes[str(i)] >= 12:
+            MoreThen12.append('%d 年%d 月%d'%(openDate.tm_year,openDate.tm_mon,openDate.tm_mday))
     
 
 if __name__ == "__main__":
     for ip in get_ip_list():
         Proxy.append('http://'+ip)
-    begin = datetime.date(2018,4,1)
+    begin = datetime.date(2018,3,25)
     end = datetime.date(2018,4,25)
     for i in range((end - begin).days+1):
         day = begin + datetime.timedelta(days=i)
         ticket_url = ticket_common_url%(day)
         main(ticket_url)
+    print("12次的日期有： %s"%(MoreThen12))
+    print("13次的日期有： %s"%(MoreThen13))
+    print("14次的日期有： %s"%(MoreThen14))
+    print("超过15次的日期有： %s"%(MoreThen15))
     
