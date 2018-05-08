@@ -90,7 +90,11 @@ def fun_38011():
     if data_38011 == None:
         print('获取网络数据失败，将再次尝试...')
         return
-    ticketJson_38011 = json.loads(data_38011)
+    try:
+        ticketJson_38011 = json.loads(data_38011)
+    except json.JSONDecodeError as e:
+        print(e)
+        return
     data = ticketJson_38011['result']['data']
     openMinute = time.strptime(data[0]['preDrawTime'], "%Y-%m-%d %H:%M:%S").tm_min
     nowMinute = time.localtime().tm_min
@@ -177,6 +181,7 @@ def getResults(data):
             else:
                 result[str(i)] = count
                 break
+            result[str(i)] = count
     return result
 
 #获取页面信息
